@@ -1,15 +1,19 @@
 import SwiftUI
 
 struct ScrollViewDemoView: View {
+    #if IOS17
     @State private var scrollPosition: Int?
+    #endif
     @State private var showsIndicators = true
 
     var body: some View {
         List {
             verticalSection
             horizontalSection
+            #if IOS17
             scrollPositionSection
             pagingSection
+            #endif
             optionsSection
         }
         .listStyle(.insetGrouped)
@@ -61,6 +65,7 @@ struct ScrollViewDemoView: View {
         }
     }
 
+    #if IOS17
     private var scrollPositionSection: some View {
         Section("Scroll Position (iOS 17+)") {
             ScrollView {
@@ -69,7 +74,7 @@ struct ScrollViewDemoView: View {
                         Text("Item \(index + 1)")
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding()
-                            .background(scrollPosition == index ? Color.blue.opacity(0.1) : Color(.secondarySystemGroupedBackground))
+                            .background(scrollPosition == index ? Color.accentColor.opacity(0.15) : Color(.secondarySystemGroupedBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                             .id(index)
                     }
@@ -128,6 +133,7 @@ struct ScrollViewDemoView: View {
             .frame(height: 160)
         }
     }
+    #endif
 
     private var optionsSection: some View {
         Section("Options") {

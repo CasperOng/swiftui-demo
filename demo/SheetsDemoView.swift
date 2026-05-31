@@ -5,7 +5,9 @@ struct SheetsDemoView: View {
     @State private var showingFullScreen = false
     @State private var showingConfirmation = false
     @State private var showingPopover = false
+    #if IOS17
     @State private var showingInspector = false
+    #endif
     @State private var selectedDetent: PresentationDetent = .medium
 
     var body: some View {
@@ -45,15 +47,17 @@ struct SheetsDemoView: View {
                             .foregroundStyle(.secondary)
                     }
                     .padding()
-                    .presentationCompactAdaptation(.popover)
+                    .modifier(CompactPopoverAdaptation())
                 }
             }
 
+            #if IOS17
             Section("Inspector") {
                 Button("Show Inspector") {
                     showingInspector = true
                 }
             }
+            #endif
 
             Section("Presentation Detents") {
                 LabeledContent("Current Detent") {
@@ -96,6 +100,7 @@ struct SheetsDemoView: View {
         } message: {
             Text("Confirmation dialogs present a set of choices related to the current context.")
         }
+        #if IOS17
         .inspector(isPresented: $showingInspector) {
             List {
                 Section("Inspector") {
@@ -111,6 +116,7 @@ struct SheetsDemoView: View {
             .listStyle(.insetGrouped)
             .inspectorColumnWidth(min: 280, ideal: 320, max: 400)
         }
+        #endif
     }
 
     private var detentLabel: String {
@@ -118,6 +124,17 @@ struct SheetsDemoView: View {
         case .medium: return "Medium"
         case .large: return "Large"
         default: return "Custom"
+        }
+    }
+}
+
+// Popover compact adaptation is iOS 16.4+; degrade gracefully on the 16.0 floor.
+private struct CompactPopoverAdaptation: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 16.4, *) {
+            content.presentationCompactAdaptation(.popover)
+        } else {
+            content
         }
     }
 }

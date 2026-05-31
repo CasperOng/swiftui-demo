@@ -18,7 +18,9 @@ struct ChartsDemoView: View {
         SalesData(month: "Jun", sales: 2200, profit: 600)
     ]
 
+    #if IOS17
     @State private var selectedMonth: String?
+    #endif
 
     var body: some View {
         List {
@@ -107,6 +109,7 @@ struct ChartsDemoView: View {
                 .accessibilityLabel("Scatter plot showing relationship between sales and profit")
             }
 
+            #if IOS17
             Section("Interactive Chart") {
                 Chart(salesData) { data in
                     BarMark(
@@ -125,6 +128,7 @@ struct ChartsDemoView: View {
                         .font(.caption)
                 }
             }
+            #endif
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Charts Demo")

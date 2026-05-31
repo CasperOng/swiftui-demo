@@ -20,14 +20,28 @@ permissions:
 env:
   PROJECT_PATH: demo.xcodeproj
   SCHEME_NAME: demo
-  ARCHIVE_PATH: build/demo.xcarchive
-  PAYLOAD_PATH: build/Payload
-  IPA_NAME: demo-unsigned.ipa
 
 jobs:
   build:
-    name: Build and Archive
+    name: Build and Archive (${{ matrix.tier }})
     runs-on: macos-15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tier: iOS18
+            min_version: "18.0"
+            flag: "IOS18 IOS17 IOS16"
+            ipa_name: demo-unsigned-iOS18.ipa
+          - tier: iOS17
+            min_version: "17.0"
+            flag: "IOS17 IOS16"
+            ipa_name: demo-unsigned-iOS17.ipa
+          - tier: iOS16
+            min_version: "16.0"
+            flag: "IOS16"
+            ipa_name: demo-unsigned-iOS16.ipa
 
     steps:
       - name: Checkout Repository
@@ -48,7 +62,7 @@ jobs:
           rm -rf build/
           mkdir -p build/
 
-      - name: Archive App
+      - name: Archive App (${{ matrix.tier }})
         run: |
           set -o pipefail
           xcodebuild \
@@ -56,18 +70,23 @@ jobs:
             -scheme "$SCHEME_NAME" \
             -configuration "${{ github.event.inputs.build_configuration || 'Release' }}" \
             -destination 'generic/platform=iOS' \
-            -archivePath "$ARCHIVE_PATH" \
+            -archivePath "build/demo-${{ matrix.tier }}.xcarchive" \
             archive \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             DEVELOPMENT_TEAM="" \
             PROVISIONING_PROFILE_SPECIFIER="" \
-            | tee xcodebuild.log
+            IPHONEOS_DEPLOYMENT_TARGET=${{ matrix.min_version }} \
+            SWIFT_ACTIVE_COMPILATION_CONDITIONS="${{ matrix.flag }}" \
+            | tee "build/xcodebuild-${{ matrix.tier }}.log"
 
-      - name: Create Unsigned IPA
+      - name: Create Unsigned IPA (${{ matrix.tier }})
         run: |
-          mkdir -p "$PAYLOAD_PATH"
+          PAYLOAD_PATH="build/Payload-${{ matrix.tier }}"
+          ARCHIVE_PATH="build/demo-${{ matrix.tier }}.xcarchive"
+          rm -rf "$PAYLOAD_PATH"
+          mkdir -p "$PAYLOAD_PATH/Payload"
 
           APP_PATH=$(find "$ARCHIVE_PATH/Products/Applications" -maxdepth 1 -name "*.app" -type d | head -n 1)
 
@@ -77,10 +96,10 @@ jobs:
             exit 1
           fi
 
-          cp -R "$APP_PATH" "$PAYLOAD_PATH/"
+          cp -R "$APP_PATH" "$PAYLOAD_PATH/Payload/"
 
-          cd build
-          zip -r "$IPA_NAME" Payload/
+          cd "$PAYLOAD_PATH"
+          zip -r "../${{ matrix.ipa_name }}" Payload/
 
       - name: Get App Version
         id: app_version
@@ -91,44 +110,49 @@ jobs:
           echo "app_version=${APP_VERSION}" >> $GITHUB_OUTPUT
           echo "build_number=${BUILD_NUMBER}" >> $GITHUB_OUTPUT
 
-      - name: Upload IPA Artifact
+      - name: Upload IPA Artifact (${{ matrix.tier }})
         uses: actions/upload-artifact@v4
         with:
-          name: demo-unsigned-ipa
-          path: build/${{ env.IPA_NAME }}
+          name: demo-unsigned-ipa-${{ matrix.tier }}
+          path: build/${{ matrix.ipa_name }}
           retention-days: 30
 
-      - name: Upload Archive Artifact
+      - name: Upload Archive Artifact (${{ matrix.tier }})
+        if: matrix.tier == 'iOS16'
         uses: actions/upload-artifact@v4
         with:
-          name: demo-archive-v${{ steps.app_version.outputs.app_version }}
-          path: build/demo.xcarchive
+          name: demo-archive-${{ matrix.tier }}-v${{ steps.app_version.outputs.app_version }}
+          path: build/demo-${{ matrix.tier }}.xcarchive
           retention-days: 7
 
-      - name: Upload Build Logs
+      - name: Upload Build Logs (${{ matrix.tier }})
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: build-logs-${{ github.run_number }}
+          name: build-logs-${{ matrix.tier }}-${{ github.run_number }}
           path: |
-            xcodebuild.log
-            build/
+            build/xcodebuild-${{ matrix.tier }}.log
           retention-days: 7
 
   release:
     name: Create Pre-Release
     runs-on: macos-15
     needs: build
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Download IPA Artifact
+      - name: Download All IPA Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: demo-unsigned-ipa
+          pattern: demo-unsigned-ipa-*
+          merge-multiple: true
           path: ./release/
+
+      - name: List Release Files
+        run: ls -lh ./release/
 
       - name: Create GitHub Pre-Release
         uses: softprops/action-gh-release@v2
@@ -137,7 +161,9 @@ jobs:
           target_commitish: ${{ github.sha }}
           name: demo prerelease ${{ github.run_number }}
           files: |
-            ./release/${{ env.IPA_NAME }}
+            ./release/demo-unsigned-iOS18.ipa
+            ./release/demo-unsigned-iOS17.ipa
+            ./release/demo-unsigned-iOS16.ipa
           prerelease: true
           draft: false
           generate_release_notes: true

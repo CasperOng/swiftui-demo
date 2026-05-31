@@ -22,6 +22,7 @@ struct TodoItem: Identifiable {
 }
 
 // MARK: - View Models
+#if IOS17
 @Observable
 class TodoViewModel {
     var todos: [TodoItem] = []
@@ -43,10 +44,37 @@ class TodoViewModel {
         todos.removeAll { $0.id == todo.id }
     }
 }
+#else
+// iOS 16 floor: the @Observable macro is iOS 17+, so fall back to ObservableObject.
+class TodoViewModel: ObservableObject {
+    @Published var todos: [TodoItem] = []
+    @Published var newTodoTitle: String = ""
+
+    func addTodo() {
+        guard !newTodoTitle.isEmpty else { return }
+        todos.append(TodoItem(title: newTodoTitle, isCompleted: false))
+        newTodoTitle = ""
+    }
+
+    func toggleTodo(_ todo: TodoItem) {
+        if let index = todos.firstIndex(where: { $0.id == todo.id }) {
+            todos[index].isCompleted.toggle()
+        }
+    }
+
+    func deleteTodo(_ todo: TodoItem) {
+        todos.removeAll { $0.id == todo.id }
+    }
+}
+#endif
 
 // MARK: - Views
 struct StateDataFlowDemoView: View {
+    #if IOS17
     @State private var todoViewModel = TodoViewModel()
+    #else
+    @StateObject private var todoViewModel = TodoViewModel()
+    #endif
     @State private var showingAddSheet = false
     @State private var selectedFilter: TodoFilter = .all
 
@@ -81,11 +109,19 @@ struct StateDataFlowDemoView: View {
             // Todo List
             List {
                 if filteredTodos.isEmpty {
+                    #if IOS17
                     ContentUnavailableView {
                         Label("No Todos", systemImage: "checklist")
                     } description: {
                         Text("Add a todo to get started.")
                     }
+                    #else
+                    ContentUnavailableMessage(
+                        title: "No Todos",
+                        systemImage: "checklist",
+                        message: "Add a todo to get started."
+                    )
+                    #endif
                 } else {
                     ForEach(filteredTodos) { todo in
                         TodoRowView(todo: todo, viewModel: todoViewModel)
@@ -146,14 +182,26 @@ struct TodoRowView: View {
 }
 
 struct AddTodoView: View {
+    #if IOS17
     let viewModel: TodoViewModel
+    #else
+    @ObservedObject var viewModel: TodoViewModel
+    #endif
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isFocused: Bool
+
+    private var titleBinding: Binding<String> {
+        #if IOS17
+        return Bindable(viewModel).newTodoTitle
+        #else
+        return $viewModel.newTodoTitle
+        #endif
+    }
 
     var body: some View {
         NavigationStack {
             Form {
-                TextField("What do you need to do?", text: Bindable(viewModel).newTodoTitle)
+                TextField("What do you need to do?", text: titleBinding)
                     .focused($isFocused)
             }
             .navigationTitle("New Todo")
