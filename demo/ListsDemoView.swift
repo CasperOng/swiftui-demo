@@ -3,27 +3,27 @@ import SwiftUI
 struct ListsDemoView: View {
     @State private var selectedItems = Set<String>()
     @State private var searchText = ""
-    
+
     let items = [
         "Item 1", "Item 2", "Item 3", "Item 4", "Item 5",
         "Item 6", "Item 7", "Item 8", "Item 9", "Item 10"
     ]
-    
+
     var filteredItems: [String] {
         if searchText.isEmpty {
             return items
         }
         return items.filter { $0.localizedCaseInsensitiveContains(searchText) }
     }
-    
+
     var body: some View {
         List {
             Section("Basic List") {
-                ForEach(items, id: \.self) { item in
+                ForEach(filteredItems, id: \.self) { item in
                     Text(item)
                 }
             }
-            
+
             Section("Selectable List") {
                 ForEach(items, id: \.self) { item in
                     HStack {
@@ -31,7 +31,8 @@ struct ListsDemoView: View {
                         Spacer()
                         if selectedItems.contains(item) {
                             Image(systemName: "checkmark")
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(.tint)
+                                .accessibilityHidden(true)
                         }
                     }
                     .contentShape(Rectangle())
@@ -42,30 +43,33 @@ struct ListsDemoView: View {
                             selectedItems.insert(item)
                         }
                     }
+                    .accessibilityLabel(item)
+                    .accessibilityAddTraits(selectedItems.contains(item) ? .isSelected : [])
                 }
             }
-            
+
             Section("Grid Layout") {
                 LazyVGrid(columns: [
                     GridItem(.flexible()),
                     GridItem(.flexible()),
                     GridItem(.flexible())
-                ], spacing: 20) {
+                ], spacing: 16) {
                     ForEach(items, id: \.self) { item in
                         VStack {
                             RoundedRectangle(cornerRadius: 10)
-                                .fill(.blue.opacity(0.2))
+                                .fill(Color(.secondarySystemGroupedBackground))
                                 .frame(height: 100)
                                 .overlay(
                                     Text(item)
-                                        .foregroundStyle(.blue)
+                                        .font(.caption)
+                                        .foregroundStyle(.primary)
                                 )
                         }
                     }
                 }
                 .padding(.vertical)
             }
-            
+
             Section("List with Swipe Actions") {
                 ForEach(items, id: \.self) { item in
                     Text(item)
@@ -75,7 +79,7 @@ struct ListsDemoView: View {
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
-                            
+
                             Button {
                                 // Edit action
                             } label: {
@@ -85,7 +89,7 @@ struct ListsDemoView: View {
                         }
                 }
             }
-            
+
             Section("List with Context Menu") {
                 ForEach(items, id: \.self) { item in
                     Text(item)
@@ -95,13 +99,15 @@ struct ListsDemoView: View {
                             } label: {
                                 Label("Share", systemImage: "square.and.arrow.up")
                             }
-                            
+
                             Button {
                                 // Edit action
                             } label: {
                                 Label("Edit", systemImage: "pencil")
                             }
-                            
+
+                            Divider()
+
                             Button(role: .destructive) {
                                 // Delete action
                             } label: {
@@ -111,6 +117,7 @@ struct ListsDemoView: View {
                 }
             }
         }
+        .listStyle(.insetGrouped)
         .navigationTitle("Lists & Grids")
         .searchable(text: $searchText, prompt: "Search items")
     }
@@ -120,4 +127,4 @@ struct ListsDemoView: View {
     NavigationStack {
         ListsDemoView()
     }
-} 
+}

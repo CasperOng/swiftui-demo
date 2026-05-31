@@ -1,12 +1,13 @@
 import SwiftUI
 
 struct AnimationsDemoView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isAnimating = false
     @State private var rotation: Double = 0
     @State private var scale: CGFloat = 1
     @State private var offset: CGFloat = 0
     @State private var opacity: Double = 1
-    
+
     var body: some View {
         List {
             Section("Basic Animations") {
@@ -18,9 +19,10 @@ struct AnimationsDemoView: View {
                         .scaleEffect(scale)
                         .offset(x: offset)
                         .opacity(opacity)
-                    
+                        .accessibilityLabel("Animated star")
+
                     Button("Animate") {
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) {
+                        withAnimation(reduceMotion ? nil : .spring(response: 0.5, dampingFraction: 0.5)) {
                             rotation += 360
                             scale = scale == 1 ? 1.5 : 1
                             offset = offset == 0 ? 50 : 0
@@ -32,18 +34,18 @@ struct AnimationsDemoView: View {
                 .frame(maxWidth: .infinity)
                 .padding()
             }
-            
+
             Section("Transition Animations") {
                 VStack {
                     if isAnimating {
                         RoundedRectangle(cornerRadius: 20)
-                            .fill(.blue)
+                            .fill(.tint)
                             .frame(height: 100)
-                            .transition(.scale.combined(with: .opacity))
+                            .transition(reduceMotion ? .opacity : .scale.combined(with: .opacity))
                     }
-                    
+
                     Button(isAnimating ? "Hide" : "Show") {
-                        withAnimation(.spring()) {
+                        withAnimation(reduceMotion ? .none : .spring()) {
                             isAnimating.toggle()
                         }
                     }
@@ -52,52 +54,61 @@ struct AnimationsDemoView: View {
                 .frame(maxWidth: .infinity)
                 .padding()
             }
-            
+
             Section("Gesture Animations") {
-                VStack {
+                VStack(spacing: 12) {
                     Circle()
-                        .fill(.green)
+                        .fill(.green.gradient)
                         .frame(width: 100, height: 100)
                         .scaleEffect(scale)
                         .gesture(
                             DragGesture()
                                 .onChanged { _ in
-                                    withAnimation(.spring()) {
+                                    withAnimation(reduceMotion ? nil : .spring()) {
                                         scale = 1.2
                                     }
                                 }
                                 .onEnded { _ in
-                                    withAnimation(.spring()) {
+                                    withAnimation(reduceMotion ? nil : .spring()) {
                                         scale = 1
                                     }
                                 }
                         )
-                    
+                        .accessibilityLabel("Draggable circle")
+                        .accessibilityHint("Drag to see scale animation")
+
                     Text("Drag to animate")
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
             }
-            
+
+            Section {
+                if reduceMotion {
+                    Label("Reduce Motion is enabled. Animations are simplified.", systemImage: "accessibility")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             Section("Timeline Animations") {
-                TimelineView(.animation) { timeline in
+                TimelineView(.animation(paused: reduceMotion)) { timeline in
                     Canvas { context, size in
                         let time = timeline.date.timeIntervalSinceReferenceDate
-                        let angle = time.remainder(dividingBy: 2)
-                        _ = cos(angle * 2 * .pi)
-                        _ = sin(angle * 2 * .pi)
-                        
                         context.translateBy(x: size.width / 2, y: size.height / 2)
                         context.rotate(by: .degrees(time * 30))
-                        
+
                         let rect = CGRect(x: -20, y: -20, width: 40, height: 40)
                         context.fill(Path(ellipseIn: rect), with: .color(.blue))
                     }
                     .frame(height: 200)
+                    .accessibilityLabel("Rotating ellipse animation")
                 }
             }
         }
+        .listStyle(.insetGrouped)
         .navigationTitle("Animations Demo")
     }
 }
@@ -106,4 +117,4 @@ struct AnimationsDemoView: View {
     NavigationStack {
         AnimationsDemoView()
     }
-} 
+}

@@ -18,64 +18,60 @@ struct ZStackDemoView: View {
     @State private var offset: CGSize = .zero
     @State private var scale: CGFloat = 1.0
     @State private var rotation: Double = 0.0
-    
+
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: 24) {
                 // Controls
-                VStack {
-                    // Offset Control
-                    VStack {
+                VStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Offset: (\(Int(offset.width)), \(Int(offset.height)))")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                         HStack {
                             Slider(value: $offset.width, in: -100...100, step: 1)
                             Slider(value: $offset.height, in: -100...100, step: 1)
                         }
                     }
-                    .padding()
-                    
-                    // Scale Control
-                    VStack {
+
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Scale: \(String(format: "%.2f", scale))")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                         Slider(value: $scale, in: 0.5...2.0, step: 0.1)
                     }
-                    .padding()
-                    
-                    // Rotation Control
-                    VStack {
+
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Rotation: \(Int(rotation))°")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                         Slider(value: $rotation, in: 0...360, step: 1)
                     }
-                    .padding()
                 }
-                .background(Color.blue.opacity(0.1))
-                .cornerRadius(10)
-                
+                .padding()
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+
                 // Demo Content
-                VStack(spacing: 20) {
-                    // Header
+                VStack(spacing: 24) {
                     Text("ZStack Demo")
-                        .font(.title)
-                        .bold()
-                    
-                    // Description
+                        .font(.headline)
+                        .accessibilityAddTraits(.isHeader)
+
                     Text("Layered Stack Example")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
+                        .foregroundStyle(.secondary)
+
                     // Interactive Demo
                     ZStack {
-                        // Background
                         RoundedRectangle(cornerRadius: 20)
                             .fill(Color.blue.opacity(0.2))
                             .frame(width: 300, height: 300)
-                        
-                        // Middle Layer
+
                         RoundedRectangle(cornerRadius: 15)
                             .fill(Color.green.opacity(0.3))
                             .frame(width: 200, height: 200)
-                        
-                        // Foreground
+
                         RoundedRectangle(cornerRadius: 10)
                             .fill(Color.red.opacity(0.4))
                             .frame(width: 100, height: 100)
@@ -84,47 +80,43 @@ struct ZStackDemoView: View {
                             .rotationEffect(.degrees(rotation))
                     }
                     .frame(height: 300)
-                    
-                    // Sample Cards
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Interactive ZStack with three layered rectangles. Adjust controls to transform the top layer.")
+
                     ForEach(1...3, id: \.self) { index in
-                        ZStack {
-                            // Background
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.blue.opacity(0.1))
-                            
-                            // Content
-                            HStack {
-                                Image(systemName: "star.fill")
-                                    .font(.title2)
-                                    .foregroundColor(.yellow)
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Card \(index)")
-                                        .font(.headline)
-                                    Text("This card demonstrates ZStack layering with a background and content.")
-                                        .font(.body)
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                Button(action: {}) {
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.blue)
-                                }
+                        HStack {
+                            Image(systemName: "star.fill")
+                                .font(.title2)
+                                .foregroundStyle(.yellow)
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Card \(index)")
+                                    .font(.headline)
+                                Text("This card demonstrates ZStack layering with a background and content.")
+                                    .font(.body)
+                                    .foregroundStyle(.secondary)
                             }
-                            .padding()
+
+                            Spacer()
+
+                            Image(systemName: "chevron.right")
+                                .font(.body)
+                                .foregroundStyle(.secondary)
+                                .accessibilityHidden(true)
                         }
+                        .padding()
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .accessibilityElement(children: .combine)
                     }
-                    
-                    // Footer
+
                     Text("Try adjusting the offset, scale, and rotation!")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
                 .padding()
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(15)
+                .background(Color(.tertiarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
             }
             .padding()
         }
@@ -136,4 +128,4 @@ struct ZStackDemoView: View {
     NavigationStack {
         ZStackDemoView()
     }
-} 
+}

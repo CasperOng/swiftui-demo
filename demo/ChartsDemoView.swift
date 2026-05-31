@@ -17,7 +17,9 @@ struct ChartsDemoView: View {
         SalesData(month: "May", sales: 2000, profit: 500),
         SalesData(month: "Jun", sales: 2200, profit: 600)
     ]
-    
+
+    @State private var selectedMonth: String?
+
     var body: some View {
         List {
             Section("Bar Chart") {
@@ -29,9 +31,9 @@ struct ChartsDemoView: View {
                     .foregroundStyle(.blue.gradient)
                 }
                 .frame(height: 200)
-                .padding()
+                .accessibilityLabel("Bar chart showing monthly sales from January to June")
             }
-            
+
             Section("Line Chart") {
                 Chart(salesData) { data in
                     LineMark(
@@ -42,9 +44,9 @@ struct ChartsDemoView: View {
                     .symbol(.circle)
                 }
                 .frame(height: 200)
-                .padding()
+                .accessibilityLabel("Line chart showing sales trend from January to June")
             }
-            
+
             Section("Area Chart") {
                 Chart(salesData) { data in
                     AreaMark(
@@ -52,29 +54,41 @@ struct ChartsDemoView: View {
                         y: .value("Sales", data.sales)
                     )
                     .foregroundStyle(.blue.opacity(0.2))
-                }
-                .frame(height: 200)
-                .padding()
-            }
-            
-            Section("Multiple Series") {
-                Chart(salesData) { data in
-                    BarMark(
+
+                    LineMark(
                         x: .value("Month", data.month),
                         y: .value("Sales", data.sales)
                     )
-                    .foregroundStyle(.blue.gradient)
-                    
-                    BarMark(
-                        x: .value("Month", data.month),
-                        y: .value("Profit", data.profit)
-                    )
-                    .foregroundStyle(.green.gradient)
+                    .foregroundStyle(.blue)
                 }
                 .frame(height: 200)
-                .padding()
+                .accessibilityLabel("Area chart showing sales volume from January to June")
             }
-            
+
+            Section("Multiple Series") {
+                Chart {
+                    ForEach(salesData) { data in
+                        BarMark(
+                            x: .value("Month", data.month),
+                            y: .value("Amount", data.sales)
+                        )
+                        .foregroundStyle(by: .value("Type", "Sales"))
+
+                        BarMark(
+                            x: .value("Month", data.month),
+                            y: .value("Amount", data.profit)
+                        )
+                        .foregroundStyle(by: .value("Type", "Profit"))
+                    }
+                }
+                .chartForegroundStyleScale([
+                    "Sales": .blue,
+                    "Profit": .green
+                ])
+                .frame(height: 200)
+                .accessibilityLabel("Grouped bar chart comparing sales and profit by month")
+            }
+
             Section("Scatter Plot") {
                 Chart(salesData) { data in
                     PointMark(
@@ -83,34 +97,36 @@ struct ChartsDemoView: View {
                     )
                     .foregroundStyle(.purple)
                     .symbolSize(100)
+                    .annotation(position: .top) {
+                        Text(data.month)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 .frame(height: 200)
-                .padding()
+                .accessibilityLabel("Scatter plot showing relationship between sales and profit")
             }
-            
+
             Section("Interactive Chart") {
                 Chart(salesData) { data in
                     BarMark(
                         x: .value("Month", data.month),
                         y: .value("Sales", data.sales)
                     )
-                    .foregroundStyle(.blue.gradient)
+                    .foregroundStyle(selectedMonth == data.month ? Color.blue : Color.blue.opacity(0.5))
                 }
+                .chartXSelection(value: $selectedMonth)
                 .frame(height: 200)
-                .padding()
-                .chartXSelection(value: .constant("Jan"))
-                .chartXAxis {
-                    AxisMarks(values: .automatic) { value in
-                        AxisValueLabel()
-                    }
-                }
-                .chartYAxis {
-                    AxisMarks(values: .automatic) { value in
-                        AxisValueLabel()
-                    }
+                .accessibilityLabel("Interactive bar chart. Tap a bar to select it.")
+
+                if let month = selectedMonth,
+                   let data = salesData.first(where: { $0.month == month }) {
+                    LabeledContent("Selected", value: "\(month): $\(Int(data.sales))")
+                        .font(.caption)
                 }
             }
         }
+        .listStyle(.insetGrouped)
         .navigationTitle("Charts Demo")
     }
 }
@@ -119,4 +135,4 @@ struct ChartsDemoView: View {
     NavigationStack {
         ChartsDemoView()
     }
-} 
+}

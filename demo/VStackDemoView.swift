@@ -16,15 +16,13 @@ import SwiftUI
 
 struct VStackDemoView: View {
     @State private var spacing: CGFloat = 10
-    @State private var alignment: HorizontalAlignment = .center
     @State private var showSpacingSlider = false
-    
-    // Add enum for picker
+
     private enum AlignmentOption: String, CaseIterable {
         case leading = "Leading"
         case center = "Center"
         case trailing = "Trailing"
-        
+
         var alignment: HorizontalAlignment {
             switch self {
             case .leading: return .leading
@@ -33,92 +31,81 @@ struct VStackDemoView: View {
             }
         }
     }
-    
+
     @State private var selectedAlignment: AlignmentOption = .center
-    
+
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: 24) {
                 // Controls
-                VStack {
+                VStack(spacing: 16) {
                     Toggle("Show Spacing Control", isOn: $showSpacingSlider)
-                        .padding()
-                    
+
                     if showSpacingSlider {
-                        VStack {
+                        VStack(alignment: .leading, spacing: 8) {
                             Text("Spacing: \(Int(spacing))")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
                             Slider(value: $spacing, in: 0...50, step: 1)
                         }
-                        .padding()
                     }
-                    
+
                     Picker("Alignment", selection: $selectedAlignment) {
                         ForEach(AlignmentOption.allCases, id: \.self) { option in
                             Text(option.rawValue).tag(option)
                         }
                     }
                     .pickerStyle(.segmented)
-                    .padding()
-                    .onChange(of: selectedAlignment) { oldValue, newValue in
-                        alignment = newValue.alignment
-                    }
                 }
-                .background(Color.blue.opacity(0.1))
-                .cornerRadius(10)
-                
+                .padding()
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+
                 // Demo Content
-                VStack(alignment: alignment, spacing: spacing) {
-                    // Header
+                VStack(alignment: selectedAlignment.alignment, spacing: spacing) {
                     Text("VStack Demo")
-                        .font(.title)
-                        .bold()
-                    
-                    // Description
+                        .font(.headline)
+                        .accessibilityAddTraits(.isHeader)
+
                     Text("Vertical Stack Example")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
-                    // Icons
-                    HStack(spacing: 20) {
+                        .foregroundStyle(.secondary)
+
+                    HStack(spacing: 16) {
                         Image(systemName: "arrow.up.and.down")
-                            .font(.title)
+                            .font(.title2)
                         Image(systemName: "arrow.up.and.down.circle")
-                            .font(.title)
+                            .font(.title2)
                         Image(systemName: "arrow.up.and.down.circle.fill")
-                            .font(.title)
+                            .font(.title2)
                     }
-                    .foregroundColor(.blue)
-                    
-                    // Sample Cards
+                    .foregroundStyle(.tint)
+
                     ForEach(1...3, id: \.self) { index in
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Card \(index)")
                                 .font(.headline)
                             Text("This is a sample card in the VStack. It demonstrates how content can be organized vertically.")
                                 .font(.body)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.blue.opacity(0.1))
-                        .cornerRadius(10)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
-                    
-                    // Footer
+
                     Text("Try adjusting the spacing and alignment!")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
                 .padding()
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(15)
+                .background(Color(.tertiarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
             }
             .padding()
         }
         .navigationTitle("VStack Demo")
-        .onChange(of: spacing) { oldValue, newValue in
-            print("Spacing changed from \(oldValue) to \(newValue)")
-        }
     }
 }
 
@@ -126,4 +113,4 @@ struct VStackDemoView: View {
     NavigationStack {
         VStackDemoView()
     }
-} 
+}

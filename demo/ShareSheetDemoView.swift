@@ -1,146 +1,77 @@
 import SwiftUI
-import UniformTypeIdentifiers
+import PhotosUI
 
 struct ShareSheetDemoView: View {
-    @State private var showingShareSheet = false
-    @State private var showingDocumentPicker = false
     @State private var selectedText = "This is some sample text to share"
-    @State private var selectedImage: UIImage?
-    @State private var showingImagePicker = false
-    
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var selectedImage: Image?
+    @State private var selectedUIImage: UIImage?
+
     var body: some View {
         List {
             Section("Share Text") {
                 TextEditor(text: $selectedText)
                     .frame(height: 100)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.2))
-                    )
-                
-                Button("Share Text") {
-                    showingShareSheet = true
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                ShareLink(item: selectedText) {
+                    Label("Share Text", systemImage: "square.and.arrow.up")
                 }
-                .buttonStyle(.bordered)
             }
-            
+
             Section("Share Image") {
-                if let image = selectedImage {
-                    Image(uiImage: image)
+                if let selectedImage {
+                    selectedImage
                         .resizable()
                         .scaledToFit()
                         .frame(height: 200)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .accessibilityLabel("Selected photo")
                 }
-                
-                Button("Select Image") {
-                    showingImagePicker = true
+
+                PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                    Label("Select Photo", systemImage: "photo.on.rectangle")
                 }
-                .buttonStyle(.bordered)
-                
-                if selectedImage != nil {
-                    Button("Share Image") {
-                        showingShareSheet = true
+
+                if let uiImage = selectedUIImage {
+                    let transferable = Image(uiImage: uiImage)
+                    ShareLink(
+                        item: transferable,
+                        preview: SharePreview("Shared Image", image: transferable)
+                    ) {
+                        Label("Share Image", systemImage: "square.and.arrow.up")
                     }
-                    .buttonStyle(.bordered)
                 }
             }
-            
-            Section("Document Sharing") {
-                Button("Select Document") {
-                    showingDocumentPicker = true
+
+            Section("Share URL") {
+                if let url = URL(string: "https://developer.apple.com/xcode/swiftui/") {
+                    ShareLink(item: url) {
+                        Label("Share SwiftUI Link", systemImage: "link")
+                    }
                 }
-                .buttonStyle(.bordered)
             }
-            
+
             Section("Share Multiple Items") {
-                Button("Share Text and Image") {
-                    showingShareSheet = true
+                ShareLink(
+                    items: ["First item to share", "Second item to share"]
+                ) { item in
+                    SharePreview(item)
+                } label: {
+                    Label("Share Multiple Texts", systemImage: "square.and.arrow.up.on.square")
                 }
-                .buttonStyle(.bordered)
-                .disabled(selectedImage == nil)
             }
         }
-        .navigationTitle("Share Sheet Demo")
-        .sheet(isPresented: $showingShareSheet) {
-            if let image = selectedImage {
-                ShareSheet(items: [selectedText, image])
-            } else {
-                ShareSheet(items: [selectedText])
+        .listStyle(.insetGrouped)
+        .navigationTitle("Share Sheet")
+        .onChange(of: selectedPhoto) { _, newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self),
+                   let uiImage = UIImage(data: data) {
+                    selectedUIImage = uiImage
+                    selectedImage = Image(uiImage: uiImage)
+                }
             }
-        }
-        .sheet(isPresented: $showingImagePicker) {
-            ImagePicker(image: $selectedImage)
-        }
-        .sheet(isPresented: $showingDocumentPicker) {
-            DocumentPicker()
-        }
-    }
-}
-
-struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
-    
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
-    }
-    
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
-}
-
-struct ImagePicker: UIViewControllerRepresentable {
-    @Binding var image: UIImage?
-    @Environment(\.presentationMode) var presentationMode
-    
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.delegate = context.coordinator
-        picker.sourceType = .photoLibrary
-        return picker
-    }
-    
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
-    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        let parent: ImagePicker
-        
-        init(_ parent: ImagePicker) {
-            self.parent = parent
-        }
-        
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let image = info[.originalImage] as? UIImage {
-                parent.image = image
-            }
-            parent.presentationMode.wrappedValue.dismiss()
-        }
-        
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            parent.presentationMode.wrappedValue.dismiss()
-        }
-    }
-}
-
-struct DocumentPicker: UIViewControllerRepresentable {
-    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.text, .pdf, .image])
-        picker.delegate = context.coordinator
-        return picker
-    }
-    
-    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-    
-    class Coordinator: NSObject, UIDocumentPickerDelegate {
-        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-            // Handle selected documents
-            print("Selected documents: \(urls)")
         }
     }
 }
@@ -149,4 +80,4 @@ struct DocumentPicker: UIViewControllerRepresentable {
     NavigationStack {
         ShareSheetDemoView()
     }
-} 
+}

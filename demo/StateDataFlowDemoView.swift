@@ -22,22 +22,23 @@ struct TodoItem: Identifiable {
 }
 
 // MARK: - View Models
-class TodoViewModel: ObservableObject {
-    @Published var todos: [TodoItem] = []
-    @Published var newTodoTitle: String = ""
-    
+@Observable
+class TodoViewModel {
+    var todos: [TodoItem] = []
+    var newTodoTitle: String = ""
+
     func addTodo() {
         guard !newTodoTitle.isEmpty else { return }
         todos.append(TodoItem(title: newTodoTitle, isCompleted: false))
         newTodoTitle = ""
     }
-    
+
     func toggleTodo(_ todo: TodoItem) {
         if let index = todos.firstIndex(where: { $0.id == todo.id }) {
             todos[index].isCompleted.toggle()
         }
     }
-    
+
     func deleteTodo(_ todo: TodoItem) {
         todos.removeAll { $0.id == todo.id }
     }
@@ -45,14 +46,16 @@ class TodoViewModel: ObservableObject {
 
 // MARK: - Views
 struct StateDataFlowDemoView: View {
-    @StateObject private var todoViewModel = TodoViewModel()
+    @State private var todoViewModel = TodoViewModel()
     @State private var showingAddSheet = false
     @State private var selectedFilter: TodoFilter = .all
-    
-    enum TodoFilter {
-        case all, active, completed
+
+    enum TodoFilter: String, CaseIterable {
+        case all = "All"
+        case active = "Active"
+        case completed = "Done"
     }
-    
+
     var filteredTodos: [TodoItem] {
         switch selectedFilter {
         case .all:
@@ -63,87 +66,113 @@ struct StateDataFlowDemoView: View {
             return todoViewModel.todos.filter { $0.isCompleted }
         }
     }
-    
+
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             // Filter Picker
             Picker("Filter", selection: $selectedFilter) {
-                Text("All").tag(TodoFilter.all)
-                Text("Active").tag(TodoFilter.active)
-                Text("Completed").tag(TodoFilter.completed)
+                ForEach(TodoFilter.allCases, id: \.self) { filter in
+                    Text(filter.rawValue).tag(filter)
+                }
             }
             .pickerStyle(.segmented)
             .padding()
-            
+
             // Todo List
             List {
-                ForEach(filteredTodos) { todo in
-                    TodoRowView(todo: todo, viewModel: todoViewModel)
+                if filteredTodos.isEmpty {
+                    ContentUnavailableView {
+                        Label("No Todos", systemImage: "checklist")
+                    } description: {
+                        Text("Add a todo to get started.")
+                    }
+                } else {
+                    ForEach(filteredTodos) { todo in
+                        TodoRowView(todo: todo, viewModel: todoViewModel)
+                    }
                 }
             }
-            
-            // Add Todo Button
-            Button(action: { showingAddSheet = true }) {
-                Label("Add Todo", systemImage: "plus.circle.fill")
-                    .font(.headline)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding()
+            .listStyle(.insetGrouped)
         }
         .navigationTitle("State & Data Flow")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showingAddSheet = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .accessibilityLabel("Add todo")
+            }
+        }
         .sheet(isPresented: $showingAddSheet) {
             AddTodoView(viewModel: todoViewModel)
+                .presentationDetents([.medium])
         }
     }
 }
 
 struct TodoRowView: View {
     let todo: TodoItem
-    @ObservedObject var viewModel: TodoViewModel
-    
+    let viewModel: TodoViewModel
+
     var body: some View {
         HStack {
-            Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
-                .foregroundColor(todo.isCompleted ? .green : .gray)
-                .onTapGesture {
-                    viewModel.toggleTodo(todo)
-                }
-            
+            Button {
+                viewModel.toggleTodo(todo)
+            } label: {
+                Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(todo.isCompleted ? .green : .secondary)
+                    .font(.title3)
+            }
+            .buttonStyle(.plain)
+            .frame(minWidth: 44, minHeight: 44)
+            .accessibilityLabel(todo.isCompleted ? "Mark as incomplete" : "Mark as complete")
+
             Text(todo.title)
                 .strikethrough(todo.isCompleted)
-            
+                .foregroundStyle(todo.isCompleted ? .secondary : .primary)
+
             Spacer()
-            
-            Button(action: { viewModel.deleteTodo(todo) }) {
-                Image(systemName: "trash")
-                    .foregroundColor(.red)
+        }
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive) {
+                viewModel.deleteTodo(todo)
+            } label: {
+                Label("Delete", systemImage: "trash")
             }
         }
     }
 }
 
 struct AddTodoView: View {
-    @ObservedObject var viewModel: TodoViewModel
-    @Environment(\.dismiss) var dismiss
-    
+    let viewModel: TodoViewModel
+    @Environment(\.dismiss) private var dismiss
+    @FocusState private var isFocused: Bool
+
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Todo Title", text: $viewModel.newTodoTitle)
+                TextField("What do you need to do?", text: Bindable(viewModel).newTodoTitle)
+                    .focused($isFocused)
             }
             .navigationTitle("New Todo")
-            .navigationBarItems(
-                leading: Button("Cancel") { dismiss() },
-                trailing: Button("Add") {
-                    viewModel.addTodo()
-                    dismiss()
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
                 }
-                .disabled(viewModel.newTodoTitle.isEmpty)
-            )
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        viewModel.addTodo()
+                        dismiss()
+                    }
+                    .disabled(viewModel.newTodoTitle.isEmpty)
+                }
+            }
+            .onAppear {
+                isFocused = true
+            }
         }
     }
 }
@@ -152,4 +181,4 @@ struct AddTodoView: View {
     NavigationStack {
         StateDataFlowDemoView()
     }
-} 
+}
