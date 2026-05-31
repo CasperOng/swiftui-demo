@@ -119,7 +119,7 @@ struct HStackDemoView: View {
             }
             .padding()
         }
-        .navigationTitle("HStack Demo")
+        .navigationTitle("HStack")
     }
 }
 

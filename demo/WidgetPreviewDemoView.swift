@@ -12,19 +12,16 @@ struct WidgetPreviewDemoView: View {
     var body: some View {
         List {
             Section {
-                Text("Widgets surface a glanceable slice of your app on the Home Screen, Lock Screen, and in StandBy. They render with WidgetKit and SwiftUI in a separate extension target, so these are static design previews of the supported families.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .listRowSeparator(.hidden)
-            }
-
-            Section("Family") {
                 Picker("Widget Family", selection: $selectedFamily) {
                     ForEach(WidgetFamily.allCases, id: \.self) { family in
                         Text(family.rawValue).tag(family)
                     }
                 }
                 .pickerStyle(.segmented)
+            } header: {
+                Text("Family")
+            } footer: {
+                Text("Widgets surface a glanceable slice of your app on the Home Screen, Lock Screen, and in StandBy. They render with WidgetKit and SwiftUI in a separate extension target, so these are static design previews of the supported families.")
             }
 
             Section("Preview") {
@@ -33,18 +30,16 @@ struct WidgetPreviewDemoView: View {
                     .padding(.vertical)
             }
 
-            Section("Supported Families") {
+            Section {
                 LabeledContent("systemSmall", value: "2×2")
                 LabeledContent("systemMedium", value: "4×2")
                 LabeledContent("systemLarge", value: "4×4")
                 LabeledContent("accessoryRectangular", value: "Lock Screen")
                 LabeledContent("accessoryCircular", value: "Lock Screen")
-            }
-
-            Section {
+            } header: {
+                Text("Supported Families")
+            } footer: {
                 Text("Keep widget content focused on a single piece of information. Use Link and widgetURL for deep links, and design for both light and dark appearances with semantic colors.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
         }
         .listStyle(.insetGrouped)

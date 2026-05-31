@@ -10,12 +10,6 @@ struct PhotosPickerDemoView: View {
     var body: some View {
         List {
             Section {
-                Text("PhotosPicker provides a system-standard interface for selecting photos and videos. It respects the user's privacy settings without requiring full photo library access.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Single Selection") {
                 PhotosPicker(selection: $selectedItem, matching: .images) {
                     Label("Select a Photo", systemImage: "photo.on.rectangle")
                 }
@@ -28,6 +22,10 @@ struct PhotosPickerDemoView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .accessibilityLabel("Selected photo")
                 }
+            } header: {
+                Text("Single Selection")
+            } footer: {
+                Text("PhotosPicker provides a system-standard interface for selecting photos and videos. It respects the user's privacy settings without requiring full photo library access.")
             }
 
             Section("Multiple Selection") {

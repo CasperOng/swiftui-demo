@@ -10,9 +10,8 @@ struct ColorSystemDemoView: View {
                     Text(colorScheme == .dark ? "Dark" : "Light")
                         .foregroundStyle(.secondary)
                 }
+            } footer: {
                 Text("All colors below adapt automatically to Light and Dark Mode. Use semantic colors instead of hardcoded values.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
             Section("Foreground Styles") {
@@ -78,7 +77,7 @@ struct ColorSystemDemoView: View {
                 SystemColorRow(name: "tertiarySystemFill", uiColor: .tertiarySystemFill)
             }
 
-            Section("Tint / Accent Color") {
+            Section {
                 HStack {
                     Text("Current tint")
                         .font(.caption)
@@ -87,9 +86,10 @@ struct ColorSystemDemoView: View {
                         .fill(.tint)
                         .frame(width: 24, height: 24)
                 }
+            } header: {
+                Text("Tint / Accent Color")
+            } footer: {
                 Text("Set a single accent color via .tint() on the app root. All interactive elements inherit it.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
             Section("Contrast Ratios") {

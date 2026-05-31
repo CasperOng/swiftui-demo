@@ -105,7 +105,7 @@ struct VStackDemoView: View {
             }
             .padding()
         }
-        .navigationTitle("VStack Demo")
+        .navigationTitle("VStack")
     }
 }
 

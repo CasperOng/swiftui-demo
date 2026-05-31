@@ -11,9 +11,8 @@ struct TypographyDemoView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+            } footer: {
                 Text("All text styles below scale automatically with Dynamic Type. Go to Settings → Accessibility → Display & Text Size to test.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
             Section("Display Styles") {
@@ -87,16 +86,17 @@ struct TypographyDemoView: View {
                 .padding(.vertical, 4)
             }
 
-            Section("Custom Font Scaling") {
+            Section {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Custom font scaled relative to .body")
                         .font(.custom("Helvetica Neue", size: 17, relativeTo: .body))
                     Text("Custom font scaled relative to .caption")
                         .font(.custom("Helvetica Neue", size: 12, relativeTo: .caption))
-                    Text("These scale with Dynamic Type because they use relativeTo:")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
                 }
+            } header: {
+                Text("Custom Font Scaling")
+            } footer: {
+                Text("These scale with Dynamic Type because they use relativeTo:")
             }
         }
         .listStyle(.insetGrouped)

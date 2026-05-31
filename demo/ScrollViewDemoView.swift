@@ -136,12 +136,12 @@ struct ScrollViewDemoView: View {
     #endif
 
     private var optionsSection: some View {
-        Section("Options") {
+        Section {
             Toggle("Show Scroll Indicators", isOn: $showsIndicators)
-
+        } header: {
+            Text("Options")
+        } footer: {
             Text("Use contentMargins, safeAreaPadding, and scrollClipDisabled for advanced scroll layouts.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
     }
 }

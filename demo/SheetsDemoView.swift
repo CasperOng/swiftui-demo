@@ -13,12 +13,6 @@ struct SheetsDemoView: View {
     var body: some View {
         List {
             Section {
-                Text("iOS provides several modal presentation styles. Use modality sparingly — only when the user must complete or abandon a focused task.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Sheets") {
                 Button("Standard Sheet") {
                     showingSheet = true
                 }
@@ -26,6 +20,10 @@ struct SheetsDemoView: View {
                 Button("Full Screen Cover") {
                     showingFullScreen = true
                 }
+            } header: {
+                Text("Sheets")
+            } footer: {
+                Text("iOS provides several modal presentation styles. Use modality sparingly — only when the user must complete or abandon a focused task.")
             }
 
             Section("Confirmation Dialog") {

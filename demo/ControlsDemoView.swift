@@ -86,7 +86,7 @@ struct ControlsDemoView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .navigationTitle("Controls Demo")
+        .navigationTitle("Controls")
     }
 }
 

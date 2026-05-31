@@ -27,103 +27,20 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("SwiftUI Demo")
-                    .font(.largeTitle)
-                    .bold()
-                Text("Apple UI Design Kit Reference")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-            .padding([.horizontal, .top])
-
             List {
-                // Authentication
-                Section("Authentication") {
-                    Button(action: authenticateWithBiometrics) {
-                        HStack {
-                            Label("Test Face ID", systemImage: "faceid")
-                            Spacer()
-                            if isAuthenticating {
-                                ProgressView()
-                                    .controlSize(.small)
-                            }
-                        }
-                    }
-                    .disabled(isAuthenticating)
-                    .accessibilityLabel("Test Face ID authentication")
-                    .accessibilityHint("Double tap to trigger biometric authentication")
-                }
-
-                // Layout & Stacks
-                Section("Layout & Stacks") {
-                    NavigationLink("VStack", destination: VStackDemoView())
-                    NavigationLink("HStack", destination: HStackDemoView())
-                    NavigationLink("ZStack", destination: ZStackDemoView())
-                    NavigationLink("Grids & Layout", destination: GridDemoView())
-                    NavigationLink("ScrollView", destination: ScrollViewDemoView())
-                }
-
-                // Navigation & Presentation
-                Section("Navigation & Presentation") {
-                    NavigationLink("NavigationStack", destination: NavigationStackDemoView())
-                    NavigationLink("TabView", destination: TabViewDemoView())
-                    NavigationLink("Sheets & Modals", destination: SheetsDemoView())
-                    NavigationLink("Menus", destination: MenusDemoView())
-                }
-
-                // Controls & Input
-                Section("Controls & Input") {
-                    NavigationLink("Controls", destination: ControlsDemoView())
-                    NavigationLink("Forms", destination: FormsDemoView())
-                    NavigationLink("Searchable", destination: SearchableDemoView())
-                }
-
-                // Data & Media
-                Section("Data & Media") {
-                    NavigationLink("Lists & Grids", destination: ListsDemoView())
-                    NavigationLink("Charts", destination: ChartsDemoView())
-                    NavigationLink("PhotosPicker", destination: PhotosPickerDemoView())
-                    NavigationLink("MapKit", destination: MapKitDemoView())
-                }
-
-                // Visual Design
-                Section("Visual Design") {
-                    NavigationLink("Typography", destination: TypographyDemoView())
-                    NavigationLink("Color System", destination: ColorSystemDemoView())
-                    NavigationLink("SF Symbols", destination: SFSymbolsDemoView())
-                    NavigationLink("Graphics & Effects", destination: GraphicsEffectsDemoView())
-                }
-
-                // Animation & Feedback
-                Section("Animation & Feedback") {
-                    NavigationLink("Animations", destination: AnimationsDemoView())
-                    NavigationLink("Gestures", destination: GesturesDemoView())
-                    NavigationLink("Haptics", destination: HapticsDemoView())
-                    NavigationLink("Progress & Gauges", destination: ProgressGaugeDemoView())
-                }
-
-                // System Integration
-                Section("System Integration") {
-                    NavigationLink("Notifications", destination: NotificationsDemoView())
-                    NavigationLink("Share Sheet", destination: ShareSheetDemoView())
-                    NavigationLink("Widgets", destination: WidgetPreviewDemoView())
-                    NavigationLink("App Intents", destination: AppIntentsDemoView())
-                    NavigationLink("Live Activities", destination: LiveActivityDemoView())
-                }
-
-                // Accessibility
-                Section("Accessibility") {
-                    NavigationLink("Accessibility", destination: AccessibilityDemoView())
-                    NavigationLink("Dynamic Type", destination: DynamicTypeDemoView())
-                }
-
-                // State & Data Flow
-                Section("State & Data Flow") {
-                    NavigationLink("State & Data Flow", destination: StateDataFlowDemoView())
-                }
+                authenticationSection
+                layoutSection
+                navigationSection
+                controlsSection
+                dataSection
+                visualSection
+                animationSection
+                systemSection
+                accessibilitySection
+                stateSection
             }
             .listStyle(.insetGrouped)
+            .navigationTitle("SwiftUI Demo")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -151,6 +68,118 @@ struct ContentView: View {
             } message: {
                 Text("Face ID permission is required. Please enable it in Settings.")
             }
+        }
+    }
+
+    // MARK: - Sections
+
+    @ViewBuilder
+    private var authenticationSection: some View {
+        Section("Authentication") {
+            Button(action: authenticateWithBiometrics) {
+                HStack {
+                    Label {
+                        Text("Test Face ID")
+                            .foregroundStyle(.primary)
+                    } icon: {
+                        SettingsIcon(systemName: "faceid", color: .green)
+                    }
+                    Spacer()
+                    if isAuthenticating {
+                        ProgressView()
+                            .controlSize(.small)
+                    }
+                }
+            }
+            .disabled(isAuthenticating)
+            .accessibilityLabel("Test Face ID authentication")
+            .accessibilityHint("Double tap to trigger biometric authentication")
+        }
+    }
+
+    @ViewBuilder
+    private var layoutSection: some View {
+        Section("Layout & Stacks") {
+            DemoRow("VStack", systemName: "arrow.up.arrow.down", color: .blue) { VStackDemoView() }
+            DemoRow("HStack", systemName: "arrow.left.arrow.right", color: .blue) { HStackDemoView() }
+            DemoRow("ZStack", systemName: "square.3.layers.3d", color: .indigo) { ZStackDemoView() }
+            DemoRow("Grids & Layout", systemName: "square.grid.2x2", color: .indigo) { GridDemoView() }
+            DemoRow("ScrollView", systemName: "scroll", color: .teal) { ScrollViewDemoView() }
+        }
+    }
+
+    @ViewBuilder
+    private var navigationSection: some View {
+        Section("Navigation & Presentation") {
+            DemoRow("NavigationStack", systemName: "rectangle.stack", color: .orange) { NavigationStackDemoView() }
+            DemoRow("TabView", systemName: "menubar.rectangle", color: .orange) { TabViewDemoView() }
+            DemoRow("Sheets & Modals", systemName: "rectangle.portrait.bottomhalf.filled", color: .pink) { SheetsDemoView() }
+            DemoRow("Menus", systemName: "filemenu.and.selection", color: .purple) { MenusDemoView() }
+        }
+    }
+
+    @ViewBuilder
+    private var controlsSection: some View {
+        Section("Controls & Input") {
+            DemoRow("Controls", systemName: "switch.2", color: .green) { ControlsDemoView() }
+            DemoRow("Forms", systemName: "list.bullet.rectangle.portrait", color: .green) { FormsDemoView() }
+            DemoRow("Searchable", systemName: "magnifyingglass", color: .gray) { SearchableDemoView() }
+        }
+    }
+
+    @ViewBuilder
+    private var dataSection: some View {
+        Section("Data & Media") {
+            DemoRow("Lists & Grids", systemName: "list.bullet", color: .blue) { ListsDemoView() }
+            DemoRow("Charts", systemName: "chart.xyaxis.line", color: .pink) { ChartsDemoView() }
+            DemoRow("PhotosPicker", systemName: "photo.on.rectangle", color: .red) { PhotosPickerDemoView() }
+            DemoRow("MapKit", systemName: "map", color: .green) { MapKitDemoView() }
+        }
+    }
+
+    @ViewBuilder
+    private var visualSection: some View {
+        Section("Visual Design") {
+            DemoRow("Typography", systemName: "textformat", color: .indigo) { TypographyDemoView() }
+            DemoRow("Color System", systemName: "paintpalette", color: .orange) { ColorSystemDemoView() }
+            DemoRow("SF Symbols", systemName: "star.circle", color: .pink) { SFSymbolsDemoView() }
+            DemoRow("Graphics & Effects", systemName: "wand.and.rays", color: .purple) { GraphicsEffectsDemoView() }
+        }
+    }
+
+    @ViewBuilder
+    private var animationSection: some View {
+        Section("Animation & Feedback") {
+            DemoRow("Animations", systemName: "wand.and.stars", color: .purple) { AnimationsDemoView() }
+            DemoRow("Gestures", systemName: "hand.tap", color: .blue) { GesturesDemoView() }
+            DemoRow("Haptics", systemName: "iphone.radiowaves.left.and.right", color: .teal) { HapticsDemoView() }
+            DemoRow("Progress & Gauges", systemName: "gauge.medium", color: .green) { ProgressGaugeDemoView() }
+        }
+    }
+
+    @ViewBuilder
+    private var systemSection: some View {
+        Section("System Integration") {
+            DemoRow("Notifications", systemName: "bell.badge", color: .red) { NotificationsDemoView() }
+            DemoRow("Share Sheet", systemName: "square.and.arrow.up", color: .blue) { ShareSheetDemoView() }
+            DemoRow("Widgets", systemName: "square.grid.3x3.square", color: .indigo) { WidgetPreviewDemoView() }
+            DemoRow("App Intents", systemName: "app.badge.checkmark", color: .gray) { AppIntentsDemoView() }
+            DemoRow("Live Activities", systemName: "bolt.horizontal.circle", color: .orange) { LiveActivityDemoView() }
+        }
+    }
+
+    @ViewBuilder
+    private var accessibilitySection: some View {
+        Section("Accessibility") {
+            DemoRow("Accessibility", systemName: "accessibility", color: .blue) { AccessibilityDemoView() }
+            DemoRow("Dynamic Type", systemName: "textformat.size", color: .blue) { DynamicTypeDemoView() }
+        }
+    }
+
+    @ViewBuilder
+    private var stateSection: some View {
+        Section("State & Data Flow") {
+            DemoRow("State & Data Flow", systemName: "arrow.triangle.2.circlepath", color: .teal) { StateDataFlowDemoView() }
         }
     }
 
@@ -203,6 +232,34 @@ struct ContentView: View {
                     }
                     showingAuthError = true
                 }
+            }
+        }
+    }
+}
+
+/// A single Settings-style menu row: a colored icon tile, a title, and a
+/// navigation chevron (supplied automatically by NavigationLink).
+private struct DemoRow<Destination: View>: View {
+    let title: String
+    let systemName: String
+    let color: Color
+    @ViewBuilder let destination: () -> Destination
+
+    init(_ title: String, systemName: String, color: Color, @ViewBuilder destination: @escaping () -> Destination) {
+        self.title = title
+        self.systemName = systemName
+        self.color = color
+        self.destination = destination
+    }
+
+    var body: some View {
+        NavigationLink {
+            destination()
+        } label: {
+            Label {
+                Text(title)
+            } icon: {
+                SettingsIcon(systemName: systemName, color: color)
             }
         }
     }
