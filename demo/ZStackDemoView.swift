@@ -120,7 +120,7 @@ struct ZStackDemoView: View {
             }
             .padding()
         }
-        .navigationTitle("ZStack Demo")
+        .navigationTitle("ZStack")
     }
 }
 

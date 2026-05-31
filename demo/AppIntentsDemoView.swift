@@ -4,17 +4,14 @@ struct AppIntentsDemoView: View {
     var body: some View {
         List {
             Section {
-                Text("App Intents expose your app's actions to Siri, Shortcuts, Spotlight, and the Action button. You define an intent once and the system surfaces it everywhere, with parameters, confirmation, and result dialogs.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .listRowSeparator(.hidden)
-            }
-
-            Section("Anatomy of an Intent") {
                 LabeledContent("Protocol", value: "AppIntent")
                 LabeledContent("Title", value: "LocalizedStringResource")
                 LabeledContent("Parameters", value: "@Parameter")
                 LabeledContent("Action", value: "perform() async")
+            } header: {
+                Text("Anatomy of an Intent")
+            } footer: {
+                Text("App Intents expose your app's actions to Siri, Shortcuts, Spotlight, and the Action button. You define an intent once and the system surfaces it everywhere, with parameters, confirmation, and result dialogs.")
             }
 
             Section("Example") {
@@ -38,17 +35,15 @@ struct AppIntentsDemoView: View {
                 .padding(.vertical, 4)
             }
 
-            Section("Surfaces") {
+            Section {
                 Label("Siri & voice requests", systemImage: "mic.fill")
                 Label("Shortcuts app & automations", systemImage: "square.stack.3d.up.fill")
                 Label("Spotlight suggestions", systemImage: "magnifyingglass")
                 Label("Action button (on supported devices)", systemImage: "button.horizontal.top.press")
-            }
-
-            Section {
+            } header: {
+                Text("Surfaces")
+            } footer: {
                 Text("Register an AppShortcutsProvider so your most common intents appear automatically without user setup. Keep titles short and verb-led so they read naturally as spoken phrases.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
         }
         .listStyle(.insetGrouped)

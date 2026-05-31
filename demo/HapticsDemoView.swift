@@ -6,12 +6,6 @@ struct HapticsDemoView: View {
     var body: some View {
         List {
             Section {
-                Text("Haptic feedback provides tactile responses to user actions. Use them sparingly for meaningful interactions — not every tap needs a haptic.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Impact Feedback") {
                 Button {
                     let generator = UIImpactFeedbackGenerator(style: .light)
                     generator.impactOccurred()
@@ -51,6 +45,10 @@ struct HapticsDemoView: View {
                 } label: {
                     Label("Soft Impact", systemImage: "circle.fill")
                 }
+            } header: {
+                Text("Impact Feedback")
+            } footer: {
+                Text("Haptic feedback provides tactile responses to user actions. Use them sparingly for meaningful interactions — not every tap needs a haptic.")
             }
 
             Section("Notification Feedback") {
@@ -82,7 +80,7 @@ struct HapticsDemoView: View {
                 }
             }
 
-            Section("Selection Feedback") {
+            Section {
                 Button {
                     let generator = UISelectionFeedbackGenerator()
                     generator.selectionChanged()
@@ -90,22 +88,22 @@ struct HapticsDemoView: View {
                 } label: {
                     Label("Selection Changed", systemImage: "hand.point.up.left.and.text")
                 }
-
+            } header: {
+                Text("Selection Feedback")
+            } footer: {
                 Text("Used for picker scrolling, segment changes, and similar selection interactions.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
-            Section("When to Use Haptics") {
-                VStack(alignment: .leading, spacing: 12) {
-                    HapticGuidelineRow(icon: "checkmark.circle", text: "Confirming an action (save, send, delete)")
-                    HapticGuidelineRow(icon: "checkmark.circle", text: "Toggle state changes")
-                    HapticGuidelineRow(icon: "checkmark.circle", text: "Reaching a boundary (end of scroll)")
-                    HapticGuidelineRow(icon: "xmark.circle", text: "Every button tap")
-                    HapticGuidelineRow(icon: "xmark.circle", text: "Continuous scrolling")
-                    HapticGuidelineRow(icon: "xmark.circle", text: "Background events")
-                }
-                .padding(.vertical, 4)
+            Section("Good Uses") {
+                HapticGuidelineRow(icon: "checkmark.circle", text: "Confirming an action (save, send, delete)")
+                HapticGuidelineRow(icon: "checkmark.circle", text: "Toggle state changes")
+                HapticGuidelineRow(icon: "checkmark.circle", text: "Reaching a boundary (end of scroll)")
+            }
+
+            Section("Avoid") {
+                HapticGuidelineRow(icon: "xmark.circle", text: "Every button tap")
+                HapticGuidelineRow(icon: "xmark.circle", text: "Continuous scrolling")
+                HapticGuidelineRow(icon: "xmark.circle", text: "Background events")
             }
 
             if !lastTriggered.isEmpty {
@@ -127,12 +125,11 @@ private struct HapticGuidelineRow: View {
     let text: String
 
     var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.caption)
-                .foregroundStyle(icon.contains("checkmark") ? .green : .red)
+        Label {
             Text(text)
-                .font(.caption)
+        } icon: {
+            Image(systemName: icon)
+                .foregroundStyle(icon.contains("checkmark") ? .green : .red)
         }
     }
 }

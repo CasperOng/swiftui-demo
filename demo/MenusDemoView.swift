@@ -10,12 +10,6 @@ struct MenusDemoView: View {
     var body: some View {
         List {
             Section {
-                Text("Menus provide secondary actions without cluttering the interface. Use context menus for long-press, pull-down menus for toolbar actions, and Menu buttons for inline choices.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Pull-Down Menu Button") {
                 Menu("Sort By") {
                     Button {
                         sortOrder = "Name"
@@ -38,6 +32,10 @@ struct MenusDemoView: View {
                     Text(sortOrder)
                         .foregroundStyle(.secondary)
                 }
+            } header: {
+                Text("Pull-Down Menu Button")
+            } footer: {
+                Text("Menus provide secondary actions without cluttering the interface. Use context menus for long-press, pull-down menus for toolbar actions, and Menu buttons for inline choices.")
             }
 
             Section("Menu with Sections") {

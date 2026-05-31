@@ -148,7 +148,7 @@ struct GesturesDemoView: View {
                 .padding(.vertical)
             }
 
-            Section("Rotation") {
+            Section {
                 VStack(spacing: 12) {
                     Image(systemName: "arrow.triangle.2.circlepath")
                         .font(.system(size: 50))
@@ -179,17 +179,15 @@ struct GesturesDemoView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical)
-            }
-
-            Section("Gesture Guidelines") {
+            } header: {
+                Text("Rotation")
+            } footer: {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("• Every custom gesture must have a visible alternative (button or menu)")
                     Text("• Never override system gestures (back swipe, Control Center)")
                     Text("• Provide visual hints for discoverable gestures")
                     Text("• Support assistive alternatives for complex gestures")
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
             }
         }
         .listStyle(.insetGrouped)

@@ -2,7 +2,7 @@ name: Build Unsigned IPA
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feat/settings-style-redesign ]
   workflow_dispatch:
     inputs:
       build_configuration:

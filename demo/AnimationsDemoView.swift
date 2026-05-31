@@ -109,7 +109,7 @@ struct AnimationsDemoView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .navigationTitle("Animations Demo")
+        .navigationTitle("Animations")
     }
 }
 

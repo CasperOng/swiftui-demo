@@ -131,7 +131,7 @@ struct ChartsDemoView: View {
             #endif
         }
         .listStyle(.insetGrouped)
-        .navigationTitle("Charts Demo")
+        .navigationTitle("Charts")
     }
 }
 

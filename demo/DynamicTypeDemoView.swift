@@ -6,19 +6,16 @@ struct DynamicTypeDemoView: View {
     var body: some View {
         List {
             Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    LabeledContent("Current Size") {
-                        Text(sizeLabel)
-                            .font(.caption)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color(.secondarySystemFill))
-                            .clipShape(Capsule())
-                    }
-                    Text("Change text size in Settings → Accessibility → Display & Text Size → Larger Text")
+                LabeledContent("Current Size") {
+                    Text(sizeLabel)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color(.secondarySystemFill))
+                        .clipShape(Capsule())
                 }
+            } footer: {
+                Text("Change text size in Settings → Accessibility → Display & Text Size → Larger Text")
             }
 
             Section("Layout Reflow") {
@@ -98,14 +95,13 @@ struct DynamicTypeDemoView: View {
                 .padding(.vertical, 4)
             }
 
-            Section("Minimum Sizes") {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("11pt is the absolute minimum (caption2)")
-                        .font(.caption2)
-                    Text("Never go below 11pt for any text")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+            Section {
+                Text("11pt is the absolute minimum (caption2)")
+                    .font(.caption2)
+            } header: {
+                Text("Minimum Sizes")
+            } footer: {
+                Text("Never go below 11pt for any text")
             }
         }
         .listStyle(.insetGrouped)

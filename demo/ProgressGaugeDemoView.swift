@@ -133,7 +133,7 @@ struct ProgressGaugeDemoView: View {
                 .padding(.vertical, 4)
             }
 
-            Section("Tinted Progress") {
+            Section {
                 VStack(spacing: 12) {
                     ProgressView(value: 0.8)
                         .tint(.green)
@@ -143,12 +143,10 @@ struct ProgressGaugeDemoView: View {
                         .tint(.red)
                 }
                 .padding(.vertical, 4)
-            }
-
-            Section {
+            } header: {
+                Text("Tinted Progress")
+            } footer: {
                 Text("Use determinate progress (value:) when duration is known. Use indeterminate (no value) for unknown duration. Never block the entire screen with a spinner.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
         }
         .listStyle(.insetGrouped)

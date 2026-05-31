@@ -6,15 +6,12 @@ struct LiveActivityDemoView: View {
     var body: some View {
         List {
             Section {
-                Text("Live Activities show real-time information on the Lock Screen and in the Dynamic Island. They run with ActivityKit and WidgetKit in a widget extension, so these are static design previews of the layouts.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .listRowSeparator(.hidden)
-            }
-
-            Section("Lock Screen Presentation") {
                 lockScreenActivity
                     .padding(.vertical, 4)
+            } header: {
+                Text("Lock Screen Presentation")
+            } footer: {
+                Text("Live Activities show real-time information on the Lock Screen and in the Dynamic Island. They run with ActivityKit and WidgetKit in a widget extension, so these are static design previews of the layouts.")
             }
 
             Section("Dynamic Island — Compact") {
@@ -31,15 +28,13 @@ struct LiveActivityDemoView: View {
                     .padding(.vertical, 4)
             }
 
-            Section("Progress") {
+            Section {
                 Slider(value: $progress, in: 0...1)
                     .accessibilityLabel("Adjust delivery progress")
-            }
-
-            Section {
+            } header: {
+                Text("Progress")
+            } footer: {
                 Text("Update Live Activities frequently enough to stay useful, but respect the system budget. Always provide a meaningful compact and minimal presentation for the Dynamic Island.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
         }
         .listStyle(.insetGrouped)

@@ -72,14 +72,9 @@ private struct NavDetailView: View {
     var body: some View {
         List {
             Section {
-                Text("This is a detail view")
-                    .font(.headline)
-                Text("You can navigate back using the back button or swipe from the left edge.")
-                    .foregroundStyle(.secondary)
-            }
-
-            Section {
                 NavigationLink("Go to Settings", destination: NavSettingsView())
+            } footer: {
+                Text("This is a detail view. You can navigate back using the back button or swipe from the left edge.")
             }
         }
         .listStyle(.insetGrouped)
@@ -91,16 +86,13 @@ private struct NavSettingsView: View {
     var body: some View {
         List {
             Section {
-                Text("This is a settings view")
-                    .font(.headline)
-                Text("Settings content goes here")
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Preferences") {
                 Toggle("Notifications", isOn: .constant(true))
                 Toggle("Dark Mode", isOn: .constant(false))
                 LabeledContent("Version", value: "1.0.0")
+            } header: {
+                Text("Preferences")
+            } footer: {
+                Text("This is a settings view. Settings content goes here.")
             }
         }
         .listStyle(.insetGrouped)
@@ -115,13 +107,6 @@ private struct NavSheetView: View {
         NavigationStack {
             List {
                 Section {
-                    Text("This is a sheet view")
-                        .font(.headline)
-                    Text("Sheets slide up from the bottom. Swipe down or tap Done to dismiss.")
-                        .foregroundStyle(.secondary)
-                }
-
-                Section("Sheet Features") {
                     LabeledContent("Presentation") {
                         Text("Bottom sheet")
                     }
@@ -131,6 +116,10 @@ private struct NavSheetView: View {
                     LabeledContent("Dismiss") {
                         Text("Swipe or button")
                     }
+                } header: {
+                    Text("Sheet Features")
+                } footer: {
+                    Text("This is a sheet view. Sheets slide up from the bottom. Swipe down or tap Done to dismiss.")
                 }
             }
             .listStyle(.insetGrouped)
