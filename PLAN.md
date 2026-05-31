@@ -26,6 +26,9 @@
 - Ensure no hardcoded white/black colors exist
 - Verify all custom backgrounds use semantic colors that adapt
 
+### 1.4 Apple-style explanation layout
+- Replace grey explanatory boxes inside demo screens with Apple-style copy placement: the explanation should sit directly under the large title, left-aligned, and use the standard content flow instead of a separate boxed callout.
+
 ---
 
 ## Part 2 — New Apple UI Design Kit Demo Views
@@ -146,6 +149,42 @@ Anything listed here must be `#if`-gated out of the IPAs that don't meet its min
 
 ---
 
+## Part 5 — Testing & Verification
+
+### 5.1 Build verification (per tier)
+- Archive once per tier locally before pushing, overriding the deployment target and active compilation condition the same way the CI matrix does:
+  ```bash
+  xcodebuild -project demo.xcodeproj -scheme demo -configuration Release \
+    -destination 'generic/platform=iOS' -archivePath build/demo-iOS17.xcarchive archive \
+    CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM="" \
+    IPHONEOS_DEPLOYMENT_TARGET=17.0 \
+    SWIFT_ACTIVE_COMPILATION_CONDITIONS="$SWIFT_ACTIVE_COMPILATION_CONDITIONS IOS17"
+  ```
+- All three tiers must archive cleanly. A failure on the iOS 16/17 tier almost always means a version-gated API leaked past its `#if IOSxx` guard — fix the guard, don't lower the API.
+
+### 5.2 Automated tests
+- Run the existing suites against the iOS 18 tier (the default floor) on every change:
+  ```bash
+  xcodebuild test -project demo.xcodeproj -scheme demo \
+    -destination 'platform=iOS Simulator,name=iPhone 16'
+  ```
+- `demoTests/demoTests.swift` (XCTest) and `demoUITests/` (XCUITest) must stay green. Update the launch UI test if the root navigation labels in `ContentView.swift` change (Part 3 renames/reorganizes sections).
+- Add a smoke UI test that navigates into at least one new screen per section so the reorganized catalog stays exercised.
+
+### 5.3 HIG / accessibility manual checks
+| Check | How |
+|-------|-----|
+| Dark Mode | Toggle appearance in the simulator (or `Environment(\.colorScheme)` previews); confirm no hardcoded white/black and all backgrounds adapt (Part 1.3) |
+| Dynamic Type | Set the largest accessibility text size; confirm layouts reflow via `ViewThatFits` and nothing clips |
+| VoiceOver | Enable the accessibility inspector; confirm icon-only buttons announce their labels and meet 44pt targets (Part 1.2) |
+| Reduce Motion | Enable Reduce Motion; confirm `AnimationsDemoView` and gesture feedback degrade gracefully |
+| Single accent | Confirm `.tint(.blue)` is the only accent color in use (Rule 4.7) |
+
+### 5.4 Cleanup
+- Remove any temporary archives (`build/`) and scratch files created during verification before committing.
+
+---
+
 ## Execution Order
 
 1. Fix all HIG issues in existing views (Part 1)
@@ -153,12 +192,13 @@ Anything listed here must be `#if`-gated out of the IPAs that don't meet its min
 3. Rewrite `ContentView.swift` with the full catalog (Part 3)
 4. Add `#if IOS18 / IOS17 / IOS16` gates around version-specific features and their NavigationLinks (Part 4.3 / 4.4)
 5. Rework `.github/workflows/ios-build.yml` into the 3-tier build matrix and multi-IPA release (Part 4.1 / 4.2)
-6. Build and verify compilation **for each tier** (set the deployment target + flag locally and archive once per tier before pushing)
+6. Build, test, and verify **for each tier** before pushing — archive once per tier, run the test suites, and run the HIG/accessibility manual checks (Part 5)
 
 ---
 
 ## Notes
 - iOS 18 build can use all latest APIs (symbol effects, `presentationDetents`, `ScrollPosition`, etc.); the iOS 17 and iOS 16 builds drop whatever exceeds their floor via the `#if IOSxx` flags from Part 4.
 - The single source tree produces all three IPAs — there are no separate branches or targets; the difference is only the deployment target + active compilation condition passed by the matrix.
+- Demo screens should not use grey explanatory text boxes; keep the explanation directly below the main title and aligned to the left to match Apple design patterns.
 - Project uses `PBXFileSystemSynchronizedRootGroup` — no pbxproj edits needed for new files
 - All views will use semantic colors, proper text styles, 44pt touch targets, accessibility labels, and Reduce Motion support by default
