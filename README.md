@@ -46,7 +46,9 @@ xcodebuild \
 
 ## GitHub Actions
 
-This project includes a workflow at `.github/workflows/ios-build.yml` that runs on every push and performs a simulator build on GitHub-hosted macOS runners.
+This project includes a workflow at `.github/workflows/ios-build.yml` that runs on every push to `main`, archives the app as an unsigned IPA, uploads the IPA as a workflow artifact, and publishes a GitHub pre-release.
+
+The release tag is generated automatically from the workflow run number, so each build produces a distinct pre-release entry.
 
 ## Notes
 
