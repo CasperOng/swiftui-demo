@@ -64,7 +64,7 @@ struct ShareSheetDemoView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Share Sheet")
-        .onChange(of: selectedPhoto) { _, newItem in
+        .compatOnChange(of: selectedPhoto) { newItem in
             Task {
                 if let data = try? await newItem?.loadTransferable(type: Data.self),
                    let uiImage = UIImage(data: data) {

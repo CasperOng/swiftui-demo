@@ -1,5 +1,15 @@
 import SwiftUI
 
+// MagnifyGesture / RotateGesture are iOS 17+ renames of the older
+// MagnificationGesture / RotationGesture (whose value types differ).
+#if IOS17
+private typealias PinchGesture = MagnifyGesture
+private typealias TwistGesture = RotateGesture
+#else
+private typealias PinchGesture = MagnificationGesture
+private typealias TwistGesture = RotationGesture
+#endif
+
 struct GesturesDemoView: View {
     @State private var dragOffset: CGSize = .zero
     @State private var magnification: CGFloat = 1.0
@@ -64,7 +74,9 @@ struct GesturesDemoView: View {
                         }
                         .accessibilityLabel("Long press target")
                         .accessibilityHint("Press and hold for half a second to activate")
+                        #if IOS17
                         .sensoryFeedback(.impact, trigger: longPressActive)
+                        #endif
 
                     Text("Hold for 0.5 seconds")
                         .font(.caption)
@@ -110,9 +122,13 @@ struct GesturesDemoView: View {
                         .foregroundStyle(.purple)
                         .scaleEffect(magnification)
                         .gesture(
-                            MagnifyGesture()
+                            PinchGesture()
                                 .onChanged { value in
+                                    #if IOS17
                                     magnification = value.magnification
+                                    #else
+                                    magnification = value
+                                    #endif
                                     lastGesture = "Pinching"
                                 }
                                 .onEnded { _ in
@@ -139,9 +155,13 @@ struct GesturesDemoView: View {
                         .foregroundStyle(.tint)
                         .rotationEffect(rotationAngle)
                         .gesture(
-                            RotateGesture()
+                            TwistGesture()
                                 .onChanged { value in
+                                    #if IOS17
                                     rotationAngle = value.rotation
+                                    #else
+                                    rotationAngle = value
+                                    #endif
                                     lastGesture = "Rotating"
                                 }
                                 .onEnded { _ in

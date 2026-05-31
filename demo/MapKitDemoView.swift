@@ -1,6 +1,7 @@
 import SwiftUI
 import MapKit
 
+#if IOS17
 struct MapKitDemoView: View {
     @State private var position: MapCameraPosition = .automatic
     @State private var selectedMapStyle: MapStyleOption = .standard
@@ -109,6 +110,21 @@ struct MapKitDemoView: View {
         }
     }
 }
+#else
+// The SwiftUI Map(position:) API, MapCameraPosition, and .mapStyle require iOS 17+.
+// On the iOS 16 floor the whole screen is replaced with an unavailability notice.
+struct MapKitDemoView: View {
+    var body: some View {
+        ContentUnavailableMessage(
+            title: "MapKit Requires iOS 17",
+            systemImage: "map",
+            message: "The SwiftUI Map APIs shown here are available on iOS 17 and later."
+        )
+        .navigationTitle("MapKit")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+#endif
 
 #Preview {
     NavigationStack {

@@ -30,7 +30,7 @@ struct demoApp: App {
                 }
             }
             .tint(.blue)
-            .onChange(of: scenePhase) { _, newPhase in
+            .compatOnChange(of: scenePhase) { newPhase in
                 switch newPhase {
                 case .background:
                     isAuthenticated = false

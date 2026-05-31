@@ -107,6 +107,9 @@ struct ContentView: View {
                 Section("System Integration") {
                     NavigationLink("Notifications", destination: NotificationsDemoView())
                     NavigationLink("Share Sheet", destination: ShareSheetDemoView())
+                    NavigationLink("Widgets", destination: WidgetPreviewDemoView())
+                    NavigationLink("App Intents", destination: AppIntentsDemoView())
+                    NavigationLink("Live Activities", destination: LiveActivityDemoView())
                 }
 
                 // Accessibility

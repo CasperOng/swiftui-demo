@@ -37,7 +37,9 @@ struct SFSymbolsDemoView: View {
                         .font(.system(size: 60, weight: symbolWeight))
                         .frame(height: 80)
                         .frame(maxWidth: .infinity)
+                        #if IOS17
                         .symbolEffect(.bounce, value: isBouncing)
+                        #endif
 
                     Text(symbolName)
                         .font(.caption)
@@ -89,6 +91,7 @@ struct SFSymbolsDemoView: View {
                 .padding(.vertical, 4)
             }
 
+            #if IOS17
             Section("Symbol Effects (iOS 17+)") {
                 Button("Bounce") {
                     isBouncing.toggle()
@@ -98,9 +101,11 @@ struct SFSymbolsDemoView: View {
                     Image(systemName: "bell.fill")
                         .font(.title2)
                         .symbolEffect(.pulse, isActive: true)
+                    #if IOS18
                     Image(systemName: "arrow.clockwise")
                         .font(.title2)
                         .symbolEffect(.rotate, isActive: true)
+                    #endif
                     Image(systemName: "wifi")
                         .font(.title2)
                         .symbolEffect(.variableColor.iterative, isActive: true)
@@ -108,6 +113,7 @@ struct SFSymbolsDemoView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
             }
+            #endif
 
             Section("Symbol Catalog") {
                 ForEach(showcaseSymbols, id: \.name) { symbol in

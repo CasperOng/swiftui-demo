@@ -72,7 +72,7 @@ struct PhotosPickerDemoView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle("PhotosPicker")
-        .onChange(of: selectedItem) { _, newItem in
+        .compatOnChange(of: selectedItem) { newItem in
             Task {
                 if let data = try? await newItem?.loadTransferable(type: Data.self),
                    let uiImage = UIImage(data: data) {
@@ -80,7 +80,7 @@ struct PhotosPickerDemoView: View {
                 }
             }
         }
-        .onChange(of: selectedItems) { _, newItems in
+        .compatOnChange(of: selectedItems) { newItems in
             Task {
                 var images: [Image] = []
                 for item in newItems {

@@ -54,7 +54,15 @@ struct SearchableDemoView: View {
     var body: some View {
         List {
             if filteredItems.isEmpty {
+                #if IOS17
                 ContentUnavailableView.search(text: searchText)
+                #else
+                ContentUnavailableMessage(
+                    title: "No Results",
+                    systemImage: "magnifyingglass",
+                    message: searchText.isEmpty ? "Start typing to search items." : "No items match \"\(searchText)\"."
+                )
+                #endif
             } else {
                 Section("Results (\(filteredItems.count))") {
                     ForEach(filteredItems, id: \.name) { item in
@@ -65,6 +73,7 @@ struct SearchableDemoView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Search")
+        #if IOS17
         .searchable(text: $searchText, tokens: $searchTokens, prompt: "Search items") { token in
             Label(token.name, systemImage: token.icon)
         }
@@ -90,6 +99,9 @@ struct SearchableDemoView: View {
                 }
             }
         }
+        #else
+        .searchable(text: $searchText, prompt: "Search items")
+        #endif
     }
 }
 
