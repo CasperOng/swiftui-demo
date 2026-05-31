@@ -89,16 +89,76 @@ Reorganize the navigation list into HIG-aligned sections:
 
 ---
 
+## Part 4 — Multi-Version IPA Builds in GitHub Actions
+
+**Goal:** Change `.github/workflows/ios-build.yml` so that a single workflow run produces **three** unsigned IPAs from the same source tree, one per minimum-iOS tier:
+
+| IPA | Minimum iOS (`IPHONEOS_DEPLOYMENT_TARGET`) | Active compilation flag |
+|-----|--------------------------------------------|-------------------------|
+| `demo-unsigned-iOS18.ipa` | `18.0` | `IOS18` |
+| `demo-unsigned-iOS17.ipa` | `17.0` | `IOS17` |
+| `demo-unsigned-iOS16.ipa` | `16.0` | `IOS16` |
+
+The iOS 17 and iOS 16 builds must **omit any feature whose API is not available on that minimum version**, so each IPA compiles and installs cleanly on its target OS floor.
+
+### 4.1 Build matrix in the workflow
+- Convert the `build` job to use a `strategy.matrix` over the three tiers. Each matrix entry defines:
+  - `min_version` (`18.0` / `17.0` / `16.0`)
+  - `flag` (`IOS18` / `IOS17` / `IOS16`)
+  - `ipa_name` (`demo-unsigned-iOS18.ipa`, etc.)
+- In the **Archive App** step, pass both the deployment-target override and the matching compilation condition to `xcodebuild`:
+  ```bash
+  IPHONEOS_DEPLOYMENT_TARGET=${{ matrix.min_version }} \
+  SWIFT_ACTIVE_COMPILATION_CONDITIONS="$SWIFT_ACTIVE_COMPILATION_CONDITIONS ${{ matrix.flag }}"
+  ```
+  (Keep the existing `CODE_SIGNING_ALLOWED=NO` / `CODE_SIGN_IDENTITY=""` / `DEVELOPMENT_TEAM=""` overrides.)
+- Make every per-tier output path unique (archive path, Payload dir, IPA name, log name) so the three matrix legs don't clobber each other.
+- Upload each IPA as its own artifact named after the tier (`demo-unsigned-ipa-iOS18`, `-iOS17`, `-iOS16`). The lowest tier still gets archived; keep the existing 30-day / 7-day retention split.
+
+### 4.2 Update the release job
+- The `release` job must download **all three** IPA artifacts and attach all of them to the single GitHub pre-release (`prerelease-<run_number>`).
+- Use `download-artifact` with a pattern/`merge-multiple` so every tier's IPA lands in `./release/`, then list all three under `files:` in `softprops/action-gh-release`.
+
+### 4.3 Feature omission via compilation conditions
+For each new and existing view, **wrap version-gated features** so they disappear when their flag is absent. Pattern:
+
+```swift
+// Available iOS 18+ only — excluded from the iOS 17 / iOS 16 IPAs
+#if IOS18
+// symbol effects, mesh gradients, ScrollPosition, etc.
+#endif
+```
+
+- In `ContentView.swift`, wrap each `NavigationLink` to a version-gated screen in the matching `#if`, so screens that can't compile on a lower floor are simply not listed (and not built) for that IPA.
+- Where a feature is only *partially* unavailable, prefer the `#if` flag to fully omit it rather than leaving a broken/empty screen.
+- Keep using runtime `if #available(...)` only for in-range graceful degradation; use the `#if IOSxx` flags for hard omission of whole features/screens.
+
+### 4.4 Feature → minimum-version map (omit when below the floor)
+Anything listed here must be `#if`-gated out of the IPAs that don't meet its minimum:
+
+| Feature / API | Min iOS | Built in | Omitted from |
+|---------------|--------:|----------|--------------|
+| Symbol effects (`.symbolEffect`, variable value), mesh gradients, `ScrollPosition`/scroll-position APIs | 18.0 | iOS18 | iOS17, iOS16 |
+| `.inspector`, `MapKit` `Map` w/ `MapCamera` + look-around, `.searchable` scopes/tokens, App Intents view patterns | 17.0 | iOS18, iOS17 | iOS16 |
+| `presentationDetents`, `PhotosPicker`/`Transferable`, `Gauge`, Live Activity / Dynamic Island previews | 16.0+ | all three | none (baseline) |
+
+> Reconfirm each API's true minimum against current docs while implementing — the table is the starting contract, not the final word. If a screen has no supportable subset on a given floor, omit the whole screen for that tier.
+
+---
+
 ## Execution Order
 
 1. Fix all HIG issues in existing views (Part 1)
 2. Create new demo views in batches (Part 2)
 3. Rewrite `ContentView.swift` with the full catalog (Part 3)
-4. Build and verify compilation
+4. Add `#if IOS18 / IOS17 / IOS16` gates around version-specific features and their NavigationLinks (Part 4.3 / 4.4)
+5. Rework `.github/workflows/ios-build.yml` into the 3-tier build matrix and multi-IPA release (Part 4.1 / 4.2)
+6. Build and verify compilation **for each tier** (set the deployment target + flag locally and archive once per tier before pushing)
 
 ---
 
 ## Notes
-- iOS 18 deployment target means we can use all latest APIs (symbol effects, `presentationDetents`, `ScrollPosition`, etc.)
+- iOS 18 build can use all latest APIs (symbol effects, `presentationDetents`, `ScrollPosition`, etc.); the iOS 17 and iOS 16 builds drop whatever exceeds their floor via the `#if IOSxx` flags from Part 4.
+- The single source tree produces all three IPAs — there are no separate branches or targets; the difference is only the deployment target + active compilation condition passed by the matrix.
 - Project uses `PBXFileSystemSynchronizedRootGroup` — no pbxproj edits needed for new files
 - All views will use semantic colors, proper text styles, 44pt touch targets, accessibility labels, and Reduce Motion support by default

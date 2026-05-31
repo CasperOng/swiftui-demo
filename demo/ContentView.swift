@@ -27,24 +27,17 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                // Header
-                Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("SwiftUI Demo")
-                            .font(.title)
-                            .bold()
-                        Text("Apple UI Design Kit Reference")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        Text("v1.0.0-alpha.1")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
-                    }
-                    .padding(.vertical, 4)
-                    .accessibilityElement(children: .combine)
-                }
+            VStack(alignment: .leading, spacing: 6) {
+                Text("SwiftUI Demo")
+                    .font(.largeTitle)
+                    .bold()
+                Text("Apple UI Design Kit Reference")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding([.horizontal, .top])
 
+            List {
                 // Authentication
                 Section("Authentication") {
                     Button(action: authenticateWithBiometrics) {
@@ -128,7 +121,6 @@ struct ContentView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .navigationTitle("SwiftUI Demo")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
